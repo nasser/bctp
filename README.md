@@ -78,6 +78,15 @@ Once the bytecode is available, the script tag in question is **replaced by the 
 Open Questions
 --------------
 
+### Local Bytecode Cache
+This will most probably be `localStorage`. Are there size restrictions? Will they be an issue?
+
+### Bytecode
+The project should be thought of in general terms, exchanging textual source code for executable bytecode. In practice, this bytecode is minified JavaScript, because that's what browers understand today and we're building this for the browser first. Can a lower level representation be passed back? Chrome's V8 does not have an intermediate representation for JavaScript – it goes straight to x86/arm assembler.
+
+### Execution Order
+Does the client side logic wait until the whole page has loaded before starting its pass? Can it swap out the `<script>` tags as they're loaded in?
+
 ### Cross Site Scripting Issues
 [JSONP](http://en.wikipedia.org/wiki/JSONP) or [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) should allow us to get around it.
 
@@ -94,6 +103,7 @@ Precedents to think about
 
 1. DNS
 1. Linux package managers and their repositories
+1. BitTorrent
 
 ### Privacy and Security
 Exchanging executable code over the internet is a risky thing. All communication should be over SSL, for sure, but this needs to be hashed out in detail.
