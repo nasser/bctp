@@ -65,19 +65,29 @@
 		
 				for (var i = 0, len = tags.length; i < len; i++) {
 					// Now that we have an array of tags to replace, do your thing.
-					var sourceTag = tags[i];
+					var sourceTag = tags[i],
+						headers = {},
+						data = null;
+					
+					if (window.RawDeflate && window.RawDeflate.deflate) {
+						data = RawDeflate.deflate(sourceTag.innerHTML);
+						headers['Content-Encoding'] = 'deflate';
+					} else {
+						data = sourceTag.innerHTML;
+					}
+
+					headers['Content-Type'] = sourceTag.getAttribute('type');
+					headers['Accept'] = 'text/javascript';
+					headers['Accept-Encoding'] = 'identity, deflate, gzip';
 					
 					// TODO: Remove jQuery dependency by including our own
 					// ajax abstraction layer.
-
+					
 					$.ajax({
 						'url': 'http://bctp.herokuapp.com/',
 						'type': 'POST',
-						'headers': {
-							'Accept': 'text/javascript',
-							'Content-Type': sourceTag.getAttribute('type')
-						},
-						'data': sourceTag.innerHTML,
+						'headers': headers,
+						'data': data,
 						'processData': false,
 						'success': function(data, status, xhr) {
 							var jsTag = document.createElement('script');
