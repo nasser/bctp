@@ -42,13 +42,14 @@
 })(function() {
 	if (!window.runtime) {
 		window.runtime = {
+			host: "http://bctp.herokuapp.com/",
 			languages: [
 				"text/coffeescript",
 				"text/ruby",
 				"text/haskell",
 				"text/python"
 			],
-			initialize: function() {
+			initialize: function() 
 				var scriptTags = document.getElementsByTagName("script");
 				var tags = [];
 				for (var i = 0, tagLength = scriptTags.length; i < tagLength; i++) {
