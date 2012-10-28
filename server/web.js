@@ -74,8 +74,24 @@ app.configure(function(){
   app.use(app.router);
 })
 
-app.get('/', function(request, response) {
-  response.send("<h1>BCTP Server</h1><p>POST with code in the body, we'll respond with JavaScript</p><p>Berg, Nasser, 2012</p>")
+app.corsCallback = function (allowed) {
+	return function (req, res, next) {
+		res.header("Access-Control-Allow-Origin", "*");
+		res.header("Access-Control-Allow-Headers", [
+			'Origin', 'X-Requested-With', 'Content-Type',
+			'Accept', 'Accept-Encoding'
+		].join(', '));
+		res.header("Allow", allowed.join(','));
+		next();
+	};
+};
+
+app.get('/runtime.js', function(request, response) {
+	response.setHeader('Content-Type', 'text/javascript');
+
+	fs = require("fs");
+	var clientRuntimeStream = fs.createReadStream("client/runtime.js");
+	clientRuntimeStream.pipe(response);
 });
 
 app.get('/.well-known/runtime', function(request, response) {
@@ -83,6 +99,12 @@ app.get('/.well-known/runtime', function(request, response) {
 	response.send(JSON.stringify({
 		'allowed-hosts': ['*']
 	}));
+});
+
+app.all('/', app.corsCallback(['GET', 'POST']));
+
+app.get('/', function(request, response) {
+  response.send("<h1>BCTP Server</h1><p>POST with code in the body, we'll respond with JavaScript</p><p>Berg, Nasser, 2012</p>")
 });
 
 app.post('/', function(request, response) {
@@ -113,21 +135,45 @@ app.post('/', function(request, response) {
 	
   buffer.on('data', function(raw) { 
 		body += raw;
+
 	}).on('error', function(err) {
 		response.status(400);
 		response.send(err);
+
 	}).on('end', function(raw) {
     var js = '';
 		try {
 			js = coffee_script.compile(body);
 			response.setHeader("Content-Type", "text/javascript");
     	response.send(js);
+
 		} catch (err) {
 			console.log(err);
 			response.status(400);
 			response.send(err);
+
 		}
   });
+});
+
+app.all('/language', app.corsCallback(['GET']));
+
+app.get('/language', function(request, response) {
+	var compilerFile = "server/compilers/" + request.query["type"] + ".js",
+		fs;
+
+	fs = require("fs");
+	fs.exists(compilerFile, function(exists) {
+		if (exists) {
+			var compiler = fs.createReadStream(compilerFile);
+			compiler.pipe(response);
+
+		} else {
+			response.status(404);
+			response.send("I don't speak that language.");
+
+		}
+	})
 });
 
 var port = process.env.PORT || 5000;
