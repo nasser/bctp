@@ -136,7 +136,7 @@
 
 			headers['Content-Type'] = this.type;
 			headers['Accept'] = 'text/javascript';
-			headers['Accept-Encoding'] = 'identity, deflate, gzip';
+			//headers['Accept-Encoding'] = 'identity, deflate, gzip';
 
 			zipped = this.compress(source);
 			data = zipped[0];
